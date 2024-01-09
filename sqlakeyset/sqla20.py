@@ -18,10 +18,9 @@ def _create_result_tuple(compile_state):
     # This is adapted from the internals of sqlalchemy.orm.loading
     keys = [ent._label_name for ent in compile_state._entities]
 
-    keyed_tuple = result_tuple(
+    return result_tuple(
         keys, [ent._extra_entities for ent in compile_state._entities]
     )
-    return keyed_tuple
 
 
 def _is_single_entity(compile_state, query_context):

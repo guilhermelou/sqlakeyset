@@ -63,7 +63,7 @@ DB = "postgresql:///taylor"
 
 
 def print_page(p):
-    print("\n\nPage for key: {}\n".format(p.paging.bookmark_current))
+    print(f"\n\nPage for key: {p.paging.bookmark_current}\n")
 
     for x in p:
         print("{:>4d}  {}  {}".format(x.peak_position, x.year, x.title))

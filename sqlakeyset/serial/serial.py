@@ -143,8 +143,7 @@ class Serial(object):
     def split(self, joined: str) -> List[str]:
         s = StringIO(joined)
         r = csv.reader(s, **self.kwargs)
-        row = next(r)
-        return row
+        return next(r)
 
     def join(self, string_list: Iterable[str]) -> str:
         s = StringIO()
@@ -158,9 +157,7 @@ class Serial(object):
         return self.join(self.serialize_value(_) for _ in values)
 
     def unserialize_values(self, s: str) -> Optional[Tuple]:
-        if s == "":
-            return None
-        return tuple(self.unserialize_value(_) for _ in self.split(s))
+        return tuple(self.unserialize_value(_) for _ in self.split(s)) if s else None
 
     def get_serializer(self, x):
         for cls in type(x).__mro__:
@@ -177,8 +174,7 @@ class Serial(object):
 
         if serializer is None:
             raise UnregisteredType(
-                "Don't know how to serialize type of {} ({}). "
-                "Use custom_bookmark_type to register it.".format(x, type(x))
+                f"Don't know how to serialize type of {x} ({type(x)}). Use custom_bookmark_type to register it."
             )
 
         try:
@@ -188,7 +184,7 @@ class Serial(object):
                 "Custom bookmark serializer " "encountered error"
             ) from e
 
-        return "{}:{}".format(c, x)
+        return f"{c}:{x}"
 
     def unserialize_value(self, x: str):
         try:
@@ -198,7 +194,7 @@ class Serial(object):
             try:
                 return BUILTINS[x]
             except KeyError:
-                raise BadBookmark("unrecognized value {}".format(x))
+                raise BadBookmark(f"unrecognized value {x}")
 
         try:
             deserializer = self.deserializers[c]
@@ -208,7 +204,7 @@ class Serial(object):
             try:
                 return BUILTINS[c]
             except KeyError:
-                raise BadBookmark("unrecognized value {}".format(x))
+                raise BadBookmark(f"unrecognized value {x}")
         else:
             try:
                 return deserializer(v)

@@ -33,11 +33,7 @@ def core_coerce_row(row, extra_columns, result_type):
         return row
     N = len(row) - len(extra_columns)
 
-    if isinstance(row, LegacyRow):
-        cls = TruncatedLegacyRow
-    else:
-        cls = TruncatedRow
-
+    cls = TruncatedLegacyRow if isinstance(row, LegacyRow) else TruncatedRow
     parent = row._parent
     if isinstance(parent, SimpleResultMetaData):
         parent = parent._reduce(list(parent.keys)[:N])

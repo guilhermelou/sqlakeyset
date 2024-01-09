@@ -37,19 +37,17 @@ def _warn_if_nullable(x):
     try:
         if x.nullable or x.property.columns[0].nullable:
             warn(
-                "Ordering by nullable column {} can cause rows to be "
-                "incorrectly omitted from the results. "
-                "See the sqlakeyset README for more details.".format(x),
+                f"Ordering by nullable column {x} can cause rows to be incorrectly omitted from the results. See the sqlakeyset README for more details.",
                 stacklevel=7,
             )
-            # stacklevel makes the warning appear in the user's calling code:
-            # 1 _warn_if_nullable
-            # 2 OC.__init__
-            # 3 list comprehension in parse_clause
-            # 4 parse_clause
-            # 5 perform_paging
-            # 6 get_page
-            # 7 <user code>
+                    # stacklevel makes the warning appear in the user's calling code:
+                    # 1 _warn_if_nullable
+                    # 2 OC.__init__
+                    # 3 list comprehension in parse_clause
+                    # 4 parse_clause
+                    # 5 perform_paging
+                    # 6 get_page
+                    # 7 <user code>
     except (AttributeError, IndexError, KeyError):
         # x isn't a column, it's probably an expression or something
         pass
@@ -128,16 +126,13 @@ class OC:
             value = compval.type.bind_processor(dialect)(value)  # type: ignore
         except (TypeError, AttributeError):
             pass
-        if self.is_ascending:
-            return compval, value
-        else:
-            return value, compval
+        return (compval, value) if self.is_ascending else (value, compval)
 
     def __str__(self):
         return str(self.uo)
 
     def __repr__(self):
-        return "<OC: {}>".format(str(self))
+        return f"<OC: {str(self)}>"
 
 
 def parse_ob_clause(selectable) -> List[OC]:
@@ -146,12 +141,10 @@ def parse_ob_clause(selectable) -> List[OC]:
     def _flatten(cl):
         if isinstance(cl, ClauseList):
             for subclause in cl.clauses:
-                for x in _flatten(subclause):
-                    yield x
+                yield from _flatten(subclause)
         elif isinstance(cl, (tuple, list)):
             for xs in cl:
-                for x in _flatten(xs):
-                    yield x
+                yield from _flatten(xs)
         else:
             yield cl
 
@@ -200,10 +193,7 @@ def _reverse_order_direction(ce: ColumnElement):
     for _ in range(_WRAPPING_DEPTH):
         mod = getattr(x, "modifier", None)
         if mod in (asc_op, desc_op):
-            if mod == asc_op:
-                x.modifier = desc_op
-            else:
-                x.modifier = asc_op
+            x.modifier = desc_op if mod == asc_op else asc_op
             return copied
         else:
             if not hasattr(x, "element"):
@@ -336,7 +326,7 @@ class AppendedColumn(MappedOrderColumn):
         super().__init__(oc)
         if not name:
             AppendedColumn._counter += 1
-            name = "{}{}".format(ORDER_COL_PREFIX, AppendedColumn._counter)
+            name = f"{ORDER_COL_PREFIX}{AppendedColumn._counter}"
         self.name = name
         self.extra_column = self.oc.comparable_value.label(self.name)
 
@@ -380,7 +370,7 @@ def derive_order_key(ocol, desc, index):
                 return AttributeColumn(ocol, index, key)
 
     try:
-        is_a_table = bool(entity == expr)
+        is_a_table = entity == expr
     except (sqlalchemy.exc.ArgumentError, TypeError):
         is_a_table = False
 

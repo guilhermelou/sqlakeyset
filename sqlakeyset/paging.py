@@ -141,8 +141,7 @@ def orm_page_from_rows(
     key_rows = [tuple(col.get_from_row(row) for col in mapped_ocols) for row in rows]
     paging = Paging(out_rows, page_size, backwards, current_place, places=key_rows)
 
-    page = Page(paging.rows, paging, keys=keys)
-    return page
+    return Page(paging.rows, paging, keys=keys)
 
 
 @overload
@@ -254,10 +253,15 @@ def orm_get_page(
         dialect=q.session.get_bind().dialect,
     )
     rows = paging_query.query.all()
-    page = orm_page_from_rows(
-        paging_query, rows, keys, result_type, per_page, backwards, current_place=place
+    return orm_page_from_rows(
+        paging_query,
+        rows,
+        keys,
+        result_type,
+        per_page,
+        backwards,
+        current_place=place,
     )
-    return page
 
 
 def core_get_page(
@@ -295,7 +299,7 @@ def core_get_page(
     keys = list(selected.keys())
     N = len(keys) - len(sel.extra_columns)
     keys = keys[:N]
-    page = core_page_from_rows(
+    return core_page_from_rows(
         sel,
         selected.fetchall(),
         keys,
@@ -304,7 +308,6 @@ def core_get_page(
         backwards,
         current_place=place,
     )
-    return page
 
 
 def core_page_from_rows(
@@ -326,8 +329,7 @@ def core_page_from_rows(
     out_rows = [make_row(row) for row in rows]
     key_rows = [tuple(col.get_from_row(row) for col in mapped_ocols) for row in rows]
     paging = Paging(out_rows, page_size, backwards, current_place, places=key_rows)
-    page = Page(paging.rows, paging, keys=keys)
-    return page
+    return Page(paging.rows, paging, keys=keys)
 
 
 # Sadly the default values for after/before used to be False, not None, so we
