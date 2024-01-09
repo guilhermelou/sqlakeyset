@@ -1,4 +1,5 @@
 """Paging data structures and bookmark handling."""
+
 from __future__ import annotations
 
 import csv
@@ -20,10 +21,10 @@ from .serial import Serial, BadBookmark
 from .types import Keyset, Marker, MarkerLike
 
 SERIALIZER_SETTINGS = dict(
-    lineterminator=str(""),
-    delimiter=str("~"),
+    lineterminator="",
+    delimiter="~",
     doublequote=False,
-    escapechar=str("\\"),
+    escapechar="\\",
     quoting=csv.QUOTE_NONE,
 )
 
@@ -187,11 +188,7 @@ class Paging(Generic[_Row]):
             self.place_1 = None
             self.place_n = None
 
-        if excess:
-            self.place_nplus1 = places[len(rows)]
-        else:
-            self.place_nplus1 = None
-
+        self.place_nplus1 = places[len(rows)] if excess else None
         four = [self.place_0, self.place_1, self.place_n, self.place_nplus1]
         # Now that we've extracted the before/beyond places, trim the places
         # list to align with the rows list, so that _get_keys_at produces
@@ -240,36 +237,24 @@ class Paging(Generic[_Row]):
     @property
     def current(self) -> Marker:
         """Marker for the current page in the current paging direction."""
-        if self.backwards:
-            return self.current_backwards
-        else:
-            return self.current_forwards
+        return self.current_backwards if self.backwards else self.current_forwards
 
     @property
     def current_opposite(self) -> Marker:
         """Marker for the current page in the opposite of the current
         paging direction."""
-        if self.backwards:
-            return self.current_forwards
-        else:
-            return self.current_backwards
+        return self.current_forwards if self.backwards else self.current_backwards
 
     @property
     def further(self) -> Marker:
         """Marker for the following page in the current paging direction."""
-        if self.backwards:
-            return self.previous
-        else:
-            return self.next
+        return self.previous if self.backwards else self.next
 
     @property
     def has_further(self) -> bool:
         """Boolean flagging whether there are more rows before this page in the
         current paging direction."""
-        if self.backwards:
-            return self.has_previous
-        else:
-            return self.has_next
+        return self.has_previous if self.backwards else self.has_next
 
     @property
     def is_full(self) -> bool:

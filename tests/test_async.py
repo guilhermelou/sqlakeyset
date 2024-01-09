@@ -27,7 +27,7 @@ ASYNC_PROTOS = {
 @pytest_asyncio.fixture
 async def async_session(dburl):
     for k, v in ASYNC_PROTOS.items():
-        dburl = re.sub("^" + k, v, dburl)
+        dburl = re.sub(f"^{k}", v, dburl)
     engine = asa.create_async_engine(dburl, future=True)
     try:
         sessionmaker = asa.async_sessionmaker(engine)

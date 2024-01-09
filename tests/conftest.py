@@ -227,7 +227,7 @@ def _dburl(request):
     data = []
 
     for x in range(count):
-        b = Book(name="Book {}".format(x), a=x, b=x % 2, c=count - x, d=99)
+        b = Book(name=f"Book {x}", a=x, b=x % 2, c=count - x, d=99)
 
         if x == 1:
             b.a = None
@@ -236,18 +236,10 @@ def _dburl(request):
         data.append(b)
 
     for x in range(count):
-        author = Author(
-            name="Author {}".format(x), info="Rank {}".format(count + 1 - x)
-        )
+        author = Author(name=f"Author {x}", info=f"Rank {count + 1 - x}")
         abooks = []
         for y in range((2 * x) % 10):
-            b = Book(
-                name="Book {}-{}".format(x, y),
-                a=x + y,
-                b=(y * x) % 2,
-                c=count - x,
-                d=99 - y,
-            )
+            b = Book(name=f"Book {x}-{y}", a=x + y, b=(y * x) % 2, c=count - x, d=99 - y)
             b.author = author
             if y % 4 != 0:
                 b.prequel = abooks[(2 * y + 1) % len(abooks)]

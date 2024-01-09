@@ -39,7 +39,7 @@ async def core_get_page(
     keys = list(selected.keys())
     N = len(keys) - len(sel.extra_columns)
     keys = keys[:N]
-    page = core_page_from_rows(
+    return core_page_from_rows(
         sel,
         selected.fetchall(),
         keys,
@@ -48,7 +48,6 @@ async def core_get_page(
         backwards,
         current_place=place,
     )
-    return page
 
 
 async def select_page(
