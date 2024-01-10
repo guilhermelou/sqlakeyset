@@ -25,6 +25,7 @@ async def core_get_page(
     per_page: int,
     place: Optional[Keyset],
     backwards: bool,
+    offset: Optional[int] = None,
 ) -> Page[Row[_TP]]:
     result_type = core_result_type(selectable, s)
     sel = prepare_paging(
@@ -34,6 +35,7 @@ async def core_get_page(
         backwards=backwards,
         orm=False,
         dialect=get_bind(q=selectable, s=s).dialect,  # type: ignore
+        offset=offset,
     )
     selected = await s.execute(sel.select)
     keys = list(selected.keys())

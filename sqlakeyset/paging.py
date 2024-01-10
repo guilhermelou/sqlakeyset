@@ -153,6 +153,7 @@ def prepare_paging(
     backwards: bool,
     orm: Literal[True],
     dialect: Dialect,
+    offset: Optional[int] = None,
 ) -> _PagingQuery:
     ...
 
@@ -165,6 +166,7 @@ def prepare_paging(
     backwards: bool,
     orm: Literal[False],
     dialect: Dialect,
+    offset: Optional[int] = None,
 ) -> _PagingSelect:
     ...
 
@@ -176,6 +178,7 @@ def prepare_paging(
     backwards: bool,
     orm: bool,
     dialect: Dialect,
+    offset: Optional[int] = None,
 ) -> Union[_PagingQuery, _PagingSelect]:
     if orm:
         if not isinstance(q, Query):
@@ -223,7 +226,12 @@ def prepare_paging(
         else:
             q = q.where(condition)
 
+
     q = q.limit(per_page + 1)  # 1 extra to check if there's a further page
+
+    if offset is not None:
+        q = q.offset(offset)
+
     if orm:
         assert isinstance(q, Query)
         return _PagingQuery(q, order_cols, mapped_ocols, extra_columns)
@@ -233,7 +241,11 @@ def prepare_paging(
 
 
 def orm_get_page(
-    q: Query[_TP], per_page: int, place: Optional[Keyset], backwards: bool
+    q: Query[_TP],
+    per_page: int,
+    place: Optional[Keyset],
+    backwards: bool,
+    offset: Optional[int] = None,
 ) -> Page:
     """Get a page from an SQLAlchemy ORM query.
 
@@ -252,6 +264,7 @@ def orm_get_page(
         backwards=backwards,
         orm=True,
         dialect=q.session.get_bind().dialect,
+        offset=offset,
     )
     rows = paging_query.query.all()
     page = orm_page_from_rows(
@@ -266,6 +279,7 @@ def core_get_page(
     per_page: int,
     place: Optional[Keyset],
     backwards: bool,
+    offset: Optional[int] = None,
 ) -> Page[Row[_TP]]:
     """Get a page from an SQLAlchemy Core selectable.
 
@@ -290,6 +304,7 @@ def core_get_page(
         backwards=backwards,
         orm=False,
         dialect=get_bind(q=selectable, s=s).dialect,
+        offset=offset,
     )
     selected = s.execute(sel.select)
     keys = list(selected.keys())
@@ -417,6 +432,7 @@ def get_page(
     after: OptionalKeyset = None,
     before: OptionalKeyset = None,
     page: Optional[Union[MarkerLike, str]] = None,
+    offset: Optional[int] = None,
 ) -> Page[Row[_TP]]:
     """Get a page of results for a legacy ORM query.
 
@@ -439,4 +455,4 @@ def get_page(
     """
     place, backwards = process_args(after, before, page)
 
-    return orm_get_page(query, per_page, place, backwards)
+    return orm_get_page(query, per_page, place, backwards, offset=offset)
